@@ -1,0 +1,420 @@
+
+<!-- signup.html -->
+{% extends "base.html" %}
+{% block title %}Join the Gaming Arena{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .gaming-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .gaming-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(107, 185, 240, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(255, 195, 113, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .signup-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 
+            0 25px 45px rgba(0, 0, 0, 0.2),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        border: none;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .signup-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    }
+    
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-align: center;
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+        background-size: 30px 30px;
+        animation: float 20s linear infinite;
+    }
+    
+    @keyframes float {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .form-section {
+        padding: 3rem 2.5rem;
+    }
+    
+    .gaming-input {
+        border: 2px solid #e1e8ed;
+        border-radius: 12px;
+        padding: 15px 20px;
+        font-size: 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .gaming-input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+        outline: none;
+    }
+    
+    .gaming-label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .gaming-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 12px;
+        padding: 15px 30px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .gaming-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .gaming-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .gaming-btn:hover::before {
+        left: 100%;
+    }
+    
+    .add-username-btn {
+        background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        color: white;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .add-username-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+    }
+    
+    .login-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .login-link:hover {
+        color: #764ba2;
+        text-decoration: underline;
+    }
+    
+    .pubg-username-item {
+        position: relative;
+        margin-bottom: 12px;
+    }
+    
+    .remove-username {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #ff6b6b;
+        border: none;
+        color: white;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .remove-username:hover {
+        background: #ff5252;
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .feature-icons {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 2rem;
+        opacity: 0.8;
+    }
+    
+    .feature-icon {
+        text-align: center;
+        color: white;
+    }
+    
+    .feature-icon i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-icon span {
+        display: block;
+        font-size: 0.8rem;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .form-section {
+            padding: 2rem 1.5rem;
+        }
+        
+        .feature-icons {
+            gap: 1rem;
+        }
+    }
+</style>
+
+<div class="gaming-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="signup-card">
+                    <div class="row g-0">
+                        <!-- Hero Section -->
+                        <div class="col-lg-5">
+                            <div class="hero-section h-100 d-flex flex-column justify-content-center">
+                                <div>
+                                    <h1 class="hero-title">🎮 Join the Arena</h1>
+                                    <p class="hero-subtitle">Enter the ultimate gaming tournament platform. Compete, win, and claim your rewards!</p>
+                                    
+                                    <div class="feature-icons">
+                                        <div class="feature-icon">
+                                            <i class="fas fa-trophy"></i>
+                                            <span>Tournaments</span>
+                                        </div>
+                                        <div class="feature-icon">
+                                            <i class="fas fa-coins"></i>
+                                            <span>Rewards</span>
+                                        </div>
+                                        <div class="feature-icon">
+                                            <i class="fas fa-users"></i>
+                                            <span>Community</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Form Section -->
+                        <div class="col-lg-7">
+                            <div class="form-section">
+                                <h2 class="text-center mb-4" style="color: #2c3e50; font-weight: 700;">Create Your Account</h2>
+                                
+                                <form method="POST">
+                                    <div class="mb-3">
+                                        <label class="gaming-label">
+                                            <i class="fas fa-user" style="color: #667eea;"></i>
+                                            Username
+                                        </label>
+                                        <input type="text" name="username" class="form-control gaming-input" placeholder="Enter your username" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="gaming-label">
+                                            <i class="fas fa-lock" style="color: #667eea;"></i>
+                                            Password
+                                        </label>
+                                        <input type="password" name="password" class="form-control gaming-input" placeholder="Create a strong password" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label class="gaming-label">
+                                            <i class="fas fa-mobile-alt" style="color: #667eea;"></i>
+                                            GPay Number
+                                        </label>
+                                        <input type="text" name="gpay_number" class="form-control gaming-input" placeholder="Your GPay number for withdrawals" required>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label class="gaming-label">
+                                            <i class="fas fa-gamepad" style="color: #667eea;"></i>
+                                            PUBG Usernames
+                                        </label>
+                                        <div id="pubg-usernames">
+                                            <div class="pubg-username-item">
+                                                <input type="text" name="pubg_username[]" class="form-control gaming-input" placeholder="Enter your PUBG username" required>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="add-username-btn" onclick="addPubgUsername()">
+                                            <i class="fas fa-plus"></i> Add Another Username
+                                        </button>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn gaming-btn w-100 text-white">
+                                        🚀 Start Gaming
+                                    </button>
+                                </form>
+                                
+                                <div class="text-center mt-4">
+                                    <p class="mb-0" style="color: #6c757d;">
+                                        Already have an account? 
+                                        <a href="{{ url_for('login') }}" class="login-link">Login here</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+{% block scripts %}
+<script>
+let usernameCount = 1;
+
+function addPubgUsername() {
+    usernameCount++;
+    const container = document.getElementById('pubg-usernames');
+    const div = document.createElement('div');
+    div.className = 'pubg-username-item';
+    div.innerHTML = `
+        <input type="text" name="pubg_username[]" class="form-control gaming-input" placeholder="Enter PUBG username ${usernameCount}">
+        <button type="button" class="remove-username" onclick="removePubgUsername(this)" title="Remove username">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    container.appendChild(div);
+    
+    // Add animation
+    div.style.opacity = '0';
+    div.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        div.style.transition = 'all 0.3s ease';
+        div.style.opacity = '1';
+        div.style.transform = 'translateY(0)';
+    }, 10);
+}
+
+function removePubgUsername(button) {
+    const item = button.parentElement;
+    item.style.transition = 'all 0.3s ease';
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        item.remove();
+        updatePlaceholders();
+    }, 300);
+}
+
+function updatePlaceholders() {
+    const inputs = document.querySelectorAll('#pubg-usernames input');
+    inputs.forEach((input, index) => {
+        input.placeholder = `Enter PUBG username ${index + 1}`;
+    });
+    usernameCount = inputs.length;
+}
+
+// Add floating label effect
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('.gaming-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.value === '') {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,146 @@
+<!-- create_team.html -->
+{% extends "base.html" %}
+{% block title %}Create Team{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">👥 Create New Team</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Team Name *</label>
+                            <input type="text" name="team_name" class="form-control" placeholder="Enter team name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Team Email *</label>
+                            <input type="email" name="team_email" class="form-control" placeholder="team@example.com" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label">Team Members</label>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="addMember()">+ Add Member</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeMember()">- Remove Member</button>
+                            </div>
+                        </div>
+                        <small class="text-muted">Add yourself and your teammates with their gaming IDs</small>
+                        
+                        <div id="team-members" class="mt-2">
+                            <!-- Leader (yourself) -->
+                            <div class="row mb-2 team-member-row">
+                                <div class="col-md-4">
+                                    <input type="text" name="member_username[]" class="form-control" 
+                                           placeholder="Username" value="{{ session.username }}" required readonly>
+                                    <small class="text-success">Team Leader (You)</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="gaming_id[]" class="form-control" 
+                                           placeholder="Your Gaming ID (PUBG/FreeFire)" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="email" name="member_email[]" class="form-control" 
+                                           placeholder="Your Email (optional)">
+                                </div>
+                            </div>
+                            
+                            <!-- Additional team members -->
+                            <div class="row mb-2 team-member-row" style="display: none;">
+                                <div class="col-md-4">
+                                    <input type="text" name="member_username[]" class="form-control" 
+                                           placeholder="Teammate Username">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="gaming_id[]" class="form-control" 
+                                           placeholder="Gaming ID">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="email" name="member_email[]" class="form-control" 
+                                           placeholder="Email (optional)">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2 team-member-row" style="display: none;">
+                                <div class="col-md-4">
+                                    <input type="text" name="member_username[]" class="form-control" 
+                                           placeholder="Teammate Username">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="gaming_id[]" class="form-control" 
+                                           placeholder="Gaming ID">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="email" name="member_email[]" class="form-control" 
+                                           placeholder="Email (optional)">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-2 team-member-row" style="display: none;">
+                                <div class="col-md-4">
+                                    <input type="text" name="member_username[]" class="form-control" 
+                                           placeholder="Teammate Username">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" name="gaming_id[]" class="form-control" 
+                                           placeholder="Gaming ID">
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="email" name="member_email[]" class="form-control" 
+                                           placeholder="Email (optional)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>💡 Tips:</strong>
+                        <ul class="mb-0">
+                            <li>Gaming IDs are PUBG/FreeFire usernames</li>
+                            <li>You can use this team for multiple tournaments</li>
+                            <li>Make sure gaming IDs are correct for tournament verification</li>
+                            <li>Team members will be notified via email when you enroll in tournaments</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('my_teams') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success">Create Team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentMembers = 1; // Start with 1 (leader)
+const maxMembers = 4;
+
+function addMember() {
+    if (currentMembers < maxMembers) {
+        const rows = document.querySelectorAll('.team-member-row');
+        rows[currentMembers].style.display = 'flex';
+        currentMembers++;
+    }
+}
+
+function removeMember() {
+    if (currentMembers > 1) {
+        currentMembers--;
+        const rows = document.querySelectorAll('.team-member-row');
+        rows[currentMembers].style.display = 'none';
+        
+        // Clear the inputs
+        const inputs = rows[currentMembers].querySelectorAll('input');
+        inputs.forEach(input => input.value = '');
+    }
+}
+</script>
+{% endblock %}

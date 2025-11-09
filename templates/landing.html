@@ -1,0 +1,42 @@
+
+<!-- landing.html -->
+{% extends "base.html" %}
+{% block title %}Welcome - Gaming Platform{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center text-white">
+        <h1 class="display-3 fw-bold mb-4">🎮 Welcome to Gaming Arena</h1>
+        <p class="lead mb-5">Join exciting PUBG & FreeFire tournaments. Win real money!</p>
+        <div class="d-grid gap-3 d-md-flex justify-content-md-center">
+            <a href="{{ url_for('signup') }}" class="btn btn-light btn-lg px-5">Sign Up</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg px-5">Login</a>
+        </div>
+        <div class="row mt-5">
+            <div class="col-md-4">
+                <div class="card bg-white bg-opacity-25 text-white">
+                    <div class="card-body">
+                        <h3>🏆 Tournaments</h3>
+                        <p>Daily tournaments with prize pools</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-white bg-opacity-25 text-white">
+                    <div class="card-body">
+                        <h3>💰 Win Money</h3>
+                        <p>Withdraw your winnings instantly</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-white bg-opacity-25 text-white">
+                    <div class="card-body">
+                        <h3>🎯 Fair Play</h3>
+                        <p>Secure and transparent platform</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

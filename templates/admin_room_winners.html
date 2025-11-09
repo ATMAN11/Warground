@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Select Winners - {{ room[1] }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-trophy text-warning me-2"></i>Select Winners - {{ room[1] }}</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('manage_winners') }}">Winner Management</a></li>
+                        <li class="breadcrumb-item active">{{ room[1] }}</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Room Info Card -->
+            <div class="card mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Room Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <strong>Room ID:</strong> #{{ room[0] }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Entry Fee:</strong> <span class="text-success">{{ room[2] }} coins</span>
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Total Players:</strong> {{ players|length }}
+                        </div>
+                        <div class="col-md-3">
+                            <strong>Prize Pool:</strong> <span class="text-warning">{{ (players|length * room[3] * 0.8)|round(2) }} coins</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reward Settings -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog me-2"></i>Reward Structure
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for setting in reward_settings %}
+                        <div class="col-md-4">
+                            <div class="border rounded p-3 text-center">
+                                <h6 class="text-primary">
+                                    {% if setting[0] == 1 %}🥇 1st Place
+                                    {% elif setting[0] == 2 %}🥈 2nd Place
+                                    {% elif setting[0] == 3 %}🥉 3rd Place
+                                    {% else %}🏆 {{ setting[0] }}th Place{% endif %}
+                                </h6>
+                                <p class="mb-1"><strong>Base Reward:</strong> {{ setting[1] }} coins</p>
+                                <p class="mb-1"><strong>Per Kill Bonus:</strong> {{ setting[2] }} coins</p>
+                                <p class="mb-0"><strong>Max Kill Bonus:</strong> {{ setting[3] }} coins</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Players Table -->
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users me-2"></i>Players & Performance
+                    </h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-warning btn-sm" onclick="distributeRewards()">
+                            <i class="fas fa-gift me-1"></i>Distribute All Rewards
+                        </button>
+                        <a href="{{ url_for('winner_history', room_id=room[0]) }}" class="btn btn-info btn-sm">
+                            <i class="fas fa-history me-1"></i>View History
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Player</th>
+                                    <th>Gaming ID</th>
+                                    <th>Team Name</th>
+                                    <th>Kills</th>
+                                    <th>Current Winner Status</th>
+                                    <th>Reward Calculator</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for player in players %}
+                                <tr {% if player[8] %}class="table-success"{% endif %}>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;">
+                                                {{ player[1][0].upper() }}
+                                            </div>
+                                            <strong>{{ player[1] }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ player[2] }}</span>
+                                    </td>
+                                    <td>{{ player[3] or 'N/A' }}</td>
+                                    <td>
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-crosshairs me-1"></i>{{ player[4] }} kills
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if player[8] %}
+                                            <span class="badge bg-success">
+                                                {% if player[8] == 1 %}🥇 Winner (1st)
+                                                {% elif player[8] == 2 %}🥈 Winner (2nd)  
+                                                {% elif player[8] == 3 %}🥉 Winner (3rd)
+                                                {% else %}🏆 Winner ({{ player[8] }}th){% endif %}
+                                            </span>
+                                            <br><small class="text-success">Reward: {{ player[9] }} coins</small>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Selected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="position-calculator" data-gaming-id="{{ player[7] }}" data-kills="{{ player[4] }}">
+                                            <select class="form-select form-select-sm position-select" onchange="calculateReward(this)">
+                                                <option value="">Select Position</option>
+                                                {% for setting in reward_settings %}
+                                                <option value="{{ setting[0] }}" data-base="{{ setting[1] }}" data-bonus="{{ setting[2] }}" data-max="{{ setting[3] }}">
+                                                    {% if setting[0] == 1 %}1st Place
+                                                    {% elif setting[0] == 2 %}2nd Place
+                                                    {% elif setting[0] == 3 %}3rd Place
+                                                    {% else %}{{ setting[0] }}th Place{% endif %}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                            <small class="calculated-reward text-info mt-1 d-block"></small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% for setting in reward_settings %}
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    onclick="selectWinner({{ player[7] }}, {{ setting[0] }})">
+                                                {% if setting[0] == 1 %}🥇
+                                                {% elif setting[0] == 2 %}🥈
+                                                {% elif setting[0] == 3 %}🥉
+                                                {% else %}{{ setting[0] }}{% endif %}
+                                            </button>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-users-slash fa-3x mb-3"></i>
+                                            <p>No players enrolled in this room</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Winner Selection Modal -->
+<div class="modal fade" id="winnerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('select_winner') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-trophy me-2"></i>Select Winner
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="room_id" value="{{ room[0] }}">
+                    <input type="hidden" name="gaming_id" id="modal-gaming-id">
+                    <input type="hidden" name="position" id="modal-position">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Player:</label>
+                        <div id="modal-player-info" class="fw-bold"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Position:</label>
+                        <div id="modal-position-info" class="fw-bold"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Performance Summary:</label>
+                        <div id="modal-performance-info" class="alert alert-info"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Admin Notes (Optional):</label>
+                        <textarea class="form-control" name="notes" id="notes" rows="3" 
+                                  placeholder="Any additional notes about this selection..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-1"></i>Confirm Selection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateReward(selectElement) {
+    const calculator = selectElement.closest('.position-calculator');
+    const kills = parseInt(calculator.dataset.kills);
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    
+    if (selectedOption.value) {
+        const baseReward = parseFloat(selectedOption.dataset.base);
+        const bonusPerKill = parseFloat(selectedOption.dataset.bonus);
+        const maxBonus = parseFloat(selectedOption.dataset.max);
+        
+        const killBonus = Math.min(kills * bonusPerKill, maxBonus);
+        const totalReward = baseReward + killBonus;
+        
+        calculator.querySelector('.calculated-reward').innerHTML = 
+            `Total: <strong>${totalReward.toFixed(2)} coins</strong> (Base: ${baseReward} + Kill Bonus: ${killBonus.toFixed(2)})`;
+    } else {
+        calculator.querySelector('.calculated-reward').innerHTML = '';
+    }
+}
+
+function selectWinner(gamingId, position) {
+    // Find player info
+    const row = document.querySelector(`[data-gaming-id="${gamingId}"]`).closest('tr');
+    const playerName = row.cells[0].querySelector('strong').textContent;
+    const gamingUsername = row.cells[1].querySelector('.badge').textContent;
+    const kills = parseInt(row.cells[3].querySelector('.badge').textContent.split(' ')[0]);
+    
+    // Get reward setting for this position
+    const rewardSettings = {{ reward_settings|tojson }};
+    const setting = rewardSettings.find(s => s[0] === position);
+    const baseReward = setting[1];
+    const bonusPerKill = setting[2];
+    const maxBonus = setting[3];
+    
+    const killBonus = Math.min(kills * bonusPerKill, maxBonus);
+    const totalReward = baseReward + killBonus;
+    
+    // Position names
+    const positionNames = {1: '🥇 1st Place', 2: '🥈 2nd Place', 3: '🥉 3rd Place'};
+    const positionName = positionNames[position] || `🏆 ${position}th Place`;
+    
+    // Fill modal
+    document.getElementById('modal-gaming-id').value = gamingId;
+    document.getElementById('modal-position').value = position;
+    document.getElementById('modal-player-info').innerHTML = `${playerName} (${gamingUsername})`;
+    document.getElementById('modal-position-info').innerHTML = positionName;
+    document.getElementById('modal-performance-info').innerHTML = 
+        `<strong>Kills:</strong> ${kills}<br>
+         <strong>Base Reward:</strong> ${baseReward} coins<br>
+         <strong>Kill Bonus:</strong> ${killBonus.toFixed(2)} coins (${kills} × ${bonusPerKill})<br>
+         <strong>Total Reward:</strong> <span class="text-success fw-bold">${totalReward.toFixed(2)} coins</span>`;
+    
+    // Show modal
+    new bootstrap.Modal(document.getElementById('winnerModal')).show();
+}
+
+function distributeRewards() {
+    if (confirm('Are you sure you want to distribute rewards to all selected winners? This will add coins to their accounts.')) {
+        window.location.href = `{{ url_for('distribute_rewards', room_id=room[0]) }}`;
+    }
+}
+
+// Initialize reward calculators
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.position-select').forEach(select => {
+        select.addEventListener('change', function() {
+            calculateReward(this);
+        });
+    });
+});
+</script>
+{% endblock %}

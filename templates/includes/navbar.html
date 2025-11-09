@@ -1,0 +1,59 @@
+<!-- navbar.html -->
+{% if session.user_id %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{{ url_for('home') }}">🎮 Gaming Platform</a>
+        
+        <!-- Navbar toggler for mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- User Navigation -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}">🏠 Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('my_gaming_ids') }}">🎮 My Gaming IDs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('my_teams') }}">👥 My Teams</a>
+                </li>
+            </ul>
+            
+            <!-- Admin Navigation -->
+            {% if session.is_admin %}
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-danger fw-bold" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        ⚙️ Admin Panel
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                        <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}">📊 Dashboard</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_rooms') }}">🏠 Manage Rooms</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}#payments">💰 Payments</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_dashboard') }}#withdrawals">💸 Withdrawals</a></li>
+                    </ul>
+                </li>
+            </ul>
+            {% endif %}
+            
+            <!-- Right side navigation -->
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <span class="nav-link" id="user-coins">💰 Coins: <strong id="coin-count">{{ user_coins if user_coins is defined else 0 }}</strong></span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('profile') }}">👤 Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="{{ url_for('logout') }}">🚪 Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endif %}

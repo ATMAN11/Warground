@@ -1,0 +1,140 @@
+<!-- my_gaming_ids.html -->
+{% extends "base.html" %}
+{% block title %}My Gaming IDs{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-white">🎮 My Gaming IDs</h2>
+            <a href="{{ url_for('add_gaming_id') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add Gaming ID
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% if gaming_ids %}
+        {% for gaming_id in gaming_ids %}
+        <div class="col-md-6 mb-4">
+            <div class="card {{ 'border-warning' if gaming_id[4] else '' }}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {{ gaming_id[3] }}
+                        {% if gaming_id[4] %}
+                        <span class="badge bg-warning text-dark">Primary</span>
+                        {% endif %}
+                    </h5>
+                    <div>
+                        <span class="badge bg-{{ 'success' if gaming_id[5] else 'secondary' }}">
+                            {{ 'Active' if gaming_id[5] else 'Inactive' }}
+                        </span>
+                        <span class="badge bg-info">{{ gaming_id[1] }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Platform:</strong> {{ gaming_id[1] }}</p>
+                            <p><strong>Username:</strong> {{ gaming_id[2] }}</p>
+                            <p><strong>Added:</strong> 
+                            {% if gaming_id[6] %}
+                                {% if gaming_id[6].__class__.__name__ == 'datetime' %}
+                                    {{ gaming_id[6].strftime('%B %d, %Y') }}
+                                {% else %}
+                                    {{ gaming_id[6] }}
+                                {% endif %}
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Tournaments:</strong> {{ gaming_id[7] }}</p>
+                            <p><strong>Total Kills:</strong> {{ gaming_id[8] }}</p>
+                            <p><strong>Rewards:</strong> {{ gaming_id[9] }} Rs</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="{{ url_for('edit_gaming_id', gaming_id=gaming_id[0]) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        {% if not gaming_id[4] %}
+                        <button class="btn btn-outline-warning btn-sm" onclick="setPrimaryGamingId({{ gaming_id[0] }})">
+                            <i class="fas fa-star"></i> Set as Primary
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <h4>No Gaming IDs Added Yet</h4>
+                <p class="text-muted">Add your gaming IDs to start participating in tournaments!</p>
+                <a href="{{ url_for('add_gaming_id') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Your First Gaming ID
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5>📋 How Gaming IDs Work</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Multiple Platforms:</strong> Add IDs for PUBG, FreeFire, etc.</li>
+                            <li><strong>Primary ID:</strong> Your default gaming ID for quick joining</li>
+                            <li><strong>Tournament Selection:</strong> Choose which IDs to use per tournament</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul>
+                            <li><strong>Performance Tracking:</strong> View stats for each gaming ID</li>
+                            <li><strong>Flexible Joining:</strong> Use different IDs for different tournaments</li>
+                            <li><strong>Easy Management:</strong> Edit, activate, or deactivate IDs anytime</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function setPrimaryGamingId(gamingId) {
+    if (confirm('Set this gaming ID as your primary ID?')) {
+        fetch(`/set_primary_gaming_id/${gamingId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Failed to update primary gaming ID: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error updating primary gaming ID');
+            console.error('Error:', error);
+        });
+    }
+}
+</script>
+{% endblock %}

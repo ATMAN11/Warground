@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Winner History - {{ room[0] }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-history text-info me-2"></i>Winner History - {{ room[0] }}</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('manage_winners') }}">Winner Management</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('room_winner_selection', room_id=room_id) }}">{{ room[0] }}</a></li>
+                        <li class="breadcrumb-item active">History</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mb-3">
+                <a href="{{ url_for('room_winner_selection', room_id=room_id) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Winner Selection
+                </a>
+            </div>
+
+            <!-- History Table -->
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-timeline me-2"></i>Winner Selection & Reward History
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Date/Time</th>
+                                    <th>Action</th>
+                                    <th>Player</th>
+                                    <th>Position</th>
+                                    <th>Reward Amount</th>
+                                    <th>Admin</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in history %}
+                                <tr>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ record[3].strftime('%Y-%m-%d %H:%M:%S') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        {% if record[0] == 'winner_selected' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-trophy me-1"></i>Winner Selected
+                                            </span>
+                                        {% elif record[0] == 'reward_distributed' %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-gift me-1"></i>Reward Distributed
+                                            </span>
+                                        {% elif record[0] == 'selection_cancelled' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Selection Cancelled
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record[7] and record[6] %}
+                                            <div>
+                                                <strong>{{ record[7] }}</strong>
+                                                <br><small class="text-muted">{{ record[6] }}</small>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record[1] %}
+                                            {% if record[1] == 1 %}
+                                                <span class="badge bg-warning">🥇 1st Place</span>
+                                            {% elif record[1] == 2 %}
+                                                <span class="badge bg-secondary">🥈 2nd Place</span>
+                                            {% elif record[1] == 3 %}
+                                                <span class="badge bg-dark">🥉 3rd Place</span>
+                                            {% else %}
+                                                <span class="badge bg-info">🏆 {{ record[1] }}th Place</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if record[2] %}
+                                            <span class="text-success fw-bold">
+                                                <i class="fas fa-coins me-1"></i>{{ record[2] }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ record[5] }}</span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ record[4] or 'No details' }}</small>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="text-muted">
+                                            <i class="fas fa-history fa-3x mb-3"></i>
+                                            <p>No history records found for this room</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

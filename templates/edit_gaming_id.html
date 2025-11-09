@@ -1,0 +1,74 @@
+<!-- edit_gaming_id.html -->
+{% extends "base.html" %}
+{% block title %}Edit Gaming ID{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">✏️ Edit Gaming ID</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Gaming Platform *</label>
+                        <select name="gaming_platform" class="form-select" required>
+                            <option value="PUBG" {{ 'selected' if gaming_id_data[1] == 'PUBG' else '' }}>PUBG Mobile</option>
+                            <option value="FreeFire" {{ 'selected' if gaming_id_data[1] == 'FreeFire' else '' }}>Free Fire</option>
+                            <option value="BGMI" {{ 'selected' if gaming_id_data[1] == 'BGMI' else '' }}>BGMI</option>
+                            <option value="COD" {{ 'selected' if gaming_id_data[1] == 'COD' else '' }}>Call of Duty Mobile</option>
+                            <option value="Valorant" {{ 'selected' if gaming_id_data[1] == 'Valorant' else '' }}>Valorant</option>
+                            <option value="Other" {{ 'selected' if gaming_id_data[1] == 'Other' else '' }}>Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Gaming Username *</label>
+                        <input type="text" name="gaming_username" class="form-control" 
+                               value="{{ gaming_id_data[2] }}" placeholder="Your in-game username" required>
+                        <small class="text-muted">Enter your exact username as it appears in the game</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Display Name</label>
+                        <input type="text" name="display_name" class="form-control" 
+                               value="{{ gaming_id_data[3] }}" placeholder="How you want this ID to be displayed">
+                        <small class="text-muted">Leave blank to use gaming username as display name</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_primary" class="form-check-input" id="isPrimary"
+                                   {{ 'checked' if gaming_id_data[4] else '' }}>
+                            <label class="form-check-label" for="isPrimary">
+                                Set as Primary Gaming ID
+                            </label>
+                            <small class="form-text text-muted">Your primary ID will be used by default when joining tournaments</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" name="is_active" class="form-check-input" id="isActive"
+                                   {{ 'checked' if gaming_id_data[5] else '' }}>
+                            <label class="form-check-label" for="isActive">
+                                Active Gaming ID
+                            </label>
+                            <small class="form-text text-muted">Only active gaming IDs can be used in tournaments</small>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Note:</strong> Changing the gaming username may affect ongoing tournaments and kill tracking records.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('my_gaming_ids') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Update Gaming ID</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

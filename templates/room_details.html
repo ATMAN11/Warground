@@ -1,0 +1,217 @@
+<!-- room_details.html -->
+{% extends "base.html" %}
+{% block title %}Room Details{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-body p-4">
+                <h2 class="mb-4">🎮 {{ room[1] }}</h2>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <p><strong>Game Type:</strong> {{ room[2] }}</p>
+                        <p><strong>Entry Fee:</strong> {{ room[3] }} coins per player</p>
+                        <p><strong>Prize Pool:</strong> {{ room[4] }} Rs</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Event Time:</strong> 
+                        {% if room[9] %}
+                            {% if room[9].__class__.__name__ == 'datetime' %}
+                                {{ room[9].strftime('%B %d, %Y at %I:%M %p') }}
+                            {% else %}
+                                {{ room[9] }}
+                            {% endif %}
+                        {% else %}
+                            TBD
+                        {% endif %}
+                        </p>
+                        <p><strong>Mode:</strong> {{ 'Multiplayer' if room[10] else 'Single Player' }}</p>
+                        <p><strong>Team Size:</strong> {{ room[11] }}-{{ room[12] }} players</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p><strong>Max Players:</strong> {{ room[5] }}</p>
+                        {% if room|length > 6 %}
+                        <p><strong>Min to Start:</strong> {{ room[6] }}</p>
+                        {% endif %}
+                        <p><strong>Current Players:</strong> {{ current_players }}</p>
+                        <p><strong>Available Slots:</strong> 
+                            <span class="badge bg-{{ 'success' if available_slots > 0 else 'danger' }}">
+                                {{ available_slots }}
+                            </span>
+                        </p>
+                        {% if room|length > 6 %}
+                        {% set can_start = current_players >= room[6] %}
+                        <p><strong>Event Status:</strong> 
+                            <span class="badge bg-{{ 'success' if can_start else 'warning' }}">
+                                {{ 'Ready to Start! ✅' if can_start else 'Need More Players ⏳' }}
+                            </span>
+                        </p>
+                        {% endif %}
+                        <p><strong>Status:</strong> <span class="badge bg-success">{{ room[14] }}</span></p>
+                        <p><strong>Room Status:</strong> 
+                            {% set room_active = room[20] if room|length > 20 and room[20] is not none else 1 %}
+                            <span class="badge bg-{{ 'success' if room_active else 'danger' }}">
+                                {{ 'Active' if room_active else 'Disabled by Admin' }}
+                            </span>
+                        </p>
+                        <p><strong>Your Coins:</strong> {{ user_coins }}</p>
+                        {% if room|length > 15 and room[15] %}
+                        <div class="alert alert-success mt-2">
+                            <strong>🎯 Kill Rewards Available!</strong><br>
+                            <small>{{ room[19] }} Rs per kill (min {{ room[18] }} kills)</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Gaming ID Enrollment Section -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">� Join Tournament</h5>
+                    </div>
+                    <div class="card-body">
+                        {% set room_active = room[20] if room|length > 20 and room[20] is not none else 1 %}
+                        {% if not room_active %}
+                        <div class="alert alert-warning">
+                            <h6>⚠️ Room Disabled</h6>
+                            <p>This room has been temporarily disabled by the admin. Tournament enrollment is not available.</p>
+                        </div>
+                        {% elif user_is_blocked %}
+                        <div class="alert alert-danger">
+                            <h6>🚫 Access Blocked</h6>
+                            <p>You have been blocked from joining this room. Please contact support if you believe this is an error.</p>
+                        </div>
+                        {% elif available_slots <= 0 %}
+                        <div class="alert alert-danger">
+                            <h6>❌ Tournament is Full!</h6>
+                            <p>This tournament has reached maximum capacity ({{ room[5] }} players). No more players can be enrolled.</p>
+                        </div>
+                        {% elif user_already_enrolled %}
+                        <div class="alert alert-info">
+                            <h6>✅ Already Enrolled</h6>
+                            <p>You are already enrolled in this tournament with your selected gaming IDs.</p>
+                            <a href="{{ url_for('room_enrollments', room_id=room[0]) }}" class="btn btn-outline-primary">
+                                View Enrollments
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info mb-3">
+                            <strong>📊 Tournament Capacity:</strong> {{ current_players }}/{{ room[5] }} players enrolled | 
+                            <strong>{{ available_slots }} slots remaining</strong>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6>Entry Requirements</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>Entry Fee:</strong> {{ room[3] }} coins per gaming ID</li>
+                                    {% set max_ids = room[12] if room|length > 12 and room[12] else 4 %}
+                                    <li><strong>Max Gaming IDs:</strong> {{ max_ids }} per user (team size)</li>
+                                    <li><strong>Your Coins:</strong> {{ user_coins }}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Gaming ID Status</h6>
+                                {% if user_gaming_ids_count > 0 %}
+                                <p class="text-success">✅ You have {{ user_gaming_ids_count }} gaming ID{{ 's' if user_gaming_ids_count > 1 else '' }} available</p>
+                                {% else %}
+                                <p class="text-warning">⚠️ No gaming IDs found</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if user_gaming_ids_count > 0 %}
+                        <a href="{{ url_for('join_room_with_gaming_ids', room_id=room[0]) }}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-gamepad"></i> Select Gaming IDs & Join Tournament
+                        </a>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <h6>No Gaming IDs Available</h6>
+                            <p>You need to add at least one gaming ID before joining tournaments.</p>
+                            <a href="{{ url_for('add_gaming_id') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Gaming ID
+                            </a>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Quick Gaming ID Management -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">🎮 Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ url_for('add_gaming_id') }}" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-plus"></i> Add Gaming ID
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ url_for('my_gaming_ids') }}" class="btn btn-outline-info w-100">
+                                    <i class="fas fa-gamepad"></i> Manage Gaming IDs
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <a href="{{ url_for('room_enrollments', room_id=room[0]) }}" class="btn btn-outline-primary">View Enrolled Teams</a>
+                    <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">Back to Rooms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const teamSelect = document.querySelector('select[name="user_team_id"]');
+    const feeCalculation = document.getElementById('fee-calculation');
+    const feeDetails = document.getElementById('fee-details');
+    const capacityWarning = document.getElementById('capacity-warning');
+    const capacityDetails = document.getElementById('capacity-details');
+    const enrollButton = document.getElementById('enroll-button');
+    
+    if (teamSelect) {
+        const entryFeePerPlayer = parseInt(teamSelect.dataset.entryFee || '0');
+        const availableSlots = parseInt(teamSelect.dataset.availableSlots || '0');
+        
+        teamSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            
+            if (selectedOption.value && !selectedOption.disabled) {
+                const members = parseInt(selectedOption.dataset.members);
+                const totalFee = members * entryFeePerPlayer;
+                
+                // Show fee calculation
+                feeDetails.innerHTML = members + ' members × ' + entryFeePerPlayer + ' coins = <strong>' + totalFee + ' coins total</strong>';
+                feeCalculation.style.display = 'block';
+                
+                // Check capacity
+                if (members <= availableSlots) {
+                    capacityDetails.innerHTML = 'Team size: ' + members + ' players | Available slots: ' + availableSlots + ' | <span class="text-success">✅ Team fits!</span>';
+                    capacityWarning.className = 'alert alert-success';
+                    enrollButton.disabled = false;
+                } else {
+                    capacityDetails.innerHTML = 'Team size: ' + members + ' players | Available slots: ' + availableSlots + ' | <span class="text-danger">❌ Team too large!</span>';
+                    capacityWarning.className = 'alert alert-danger';
+                    enrollButton.disabled = true;
+                }
+                capacityWarning.style.display = 'block';
+                
+            } else {
+                feeCalculation.style.display = 'none';
+                capacityWarning.style.display = 'none';
+                enrollButton.disabled = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

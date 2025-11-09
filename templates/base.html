@@ -1,0 +1,71 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gaming Platform{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .navbar { background: rgba(255,255,255,0.95) !important; }
+        .dropdown-menu { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    {% include 'includes/navbar.html' %}
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to update coin display dynamically
+        function updateCoinDisplay(newAmount) {
+            const coinElement = document.getElementById('coin-count');
+            if (coinElement) {
+                coinElement.textContent = newAmount;
+                // Add a brief animation to highlight the change
+                coinElement.style.color = '#28a745';
+                setTimeout(() => {
+                    coinElement.style.color = '';
+                }, 1000);
+            }
+        }
+
+        // Function to fetch current user coins from server
+        async function refreshCoinBalance() {
+            try {
+                const response = await fetch('/api/user_coins');
+                if (response.ok) {
+                    const data = await response.json();
+                    updateCoinDisplay(data.coins);
+                }
+            } catch (error) {
+                console.error('Error fetching coin balance:', error);
+            }
+        }
+
+        // Refresh coins when page becomes visible (user switches back to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                refreshCoinBalance();
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

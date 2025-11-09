@@ -1,0 +1,165 @@
+<!-- profile.html -->
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h3>👤 {{ user[0] }}</h3>
+                <p class="mb-2"><strong>GPay:</strong> {{ user[1] }}</p>
+                <h2 class="text-primary">💰 {{ user[2] }} Coins</h2>
+                <button class="btn btn-success w-100 mb-2" data-bs-toggle="modal" data-bs-target="#addCoinsModal">Add Coins</button>
+                <button class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#withdrawModal">Withdraw</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Your PUBG Usernames</h5>
+                <ul class="list-group">
+                    {% for pu in pubg_usernames %}
+                    <li class="list-group-item">{{ pu[1] }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Withdrawal History</h4>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Amount</th>
+                            <th>GPay</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Screenshot</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in withdrawals %}
+                        <tr>
+                            <td>{{ w[1] }} Rs</td>
+                            <td>{{ w[2] }}</td>
+                            <td>
+                                {% if w[3] == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% elif w[3] == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                                {% else %}
+                                <span class="badge bg-danger">{{ w[3] }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ w[4] }}</td>
+                            <td>
+                                {% if w[5] %}
+                                <a href="/static/uploads/{{ w[5] }}" target="_blank" class="btn btn-sm btn-info">View</a>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Coins Modal -->
+<div class="modal fade" id="addCoinsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">💰 Add Coins via UPI Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3">📱 Scan QR Code or Pay via UPI</h6>
+                        <div class="text-center mb-3">
+                            <img src="{{ url_for('static', filename='qr code.png') }}" 
+                                 alt="UPI QR Code" 
+                                 class="img-fluid"
+                                 style="max-width: 250px; border: 2px solid #ddd; border-radius: 8px;">
+                        </div>
+                        <div class="text-center">
+                            <a href="upi://pay?pa=9372647769@kotak811&pn=MOHAMMAD%20RINE" 
+                               class="btn btn-primary mb-3">
+                                📱 Pay with UPI App
+                            </a>
+                            <p class="text-muted small">
+                                UPI ID: <strong>9372647769@kotak811</strong><br>
+                                Name: MOHAMMAD RINE
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <form method="POST" action="{{ url_for('add_coins') }}" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">💵 Amount (Rs)</label>
+                                <input type="number" name="amount" class="form-control" min="10" required>
+                                <small class="text-muted">1 Rs = 1 Coin | Minimum: 10 Rs</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">📸 Payment Screenshot</label>
+                                <input type="file" name="payment_screenshot" class="form-control" 
+                                       accept="image/*" required>
+                                <small class="text-muted">Upload screenshot of your UPI payment</small>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <h6>📋 Instructions:</h6>
+                                <ol class="mb-0">
+                                    <li>Make UPI payment using QR code or UPI link</li>
+                                    <li>Take screenshot of payment confirmation</li>
+                                    <li>Upload screenshot and submit</li>
+                                    <li>Admin will approve and add coins</li>
+                                </ol>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success w-100">
+                                📤 Submit Payment Proof
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div class="modal fade" id="withdrawModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Withdraw Money</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('withdraw') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Amount (Rs)</label>
+                        <input type="number" name="amount" class="form-control" min="150" max="{{ user[2] }}" required>
+                        <small class="text-muted">Minimum: 150 Rs | Available: {{ user[2] }} coins</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">GPay Number</label>
+                        <input type="text" name="gpay_number" class="form-control" placeholder="Leave empty to use registered number">
+                        <small class="text-muted">Registered: {{ user[1] }}</small>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">Request Withdrawal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

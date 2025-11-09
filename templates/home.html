@@ -1,0 +1,55 @@
+<!-- home.html -->
+{% extends "base.html" %}
+{% block title %}Home - Rooms{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-white">🎮 Available Tournaments</h2>
+            <div class="bg-white px-4 py-2 rounded">
+                <strong>Your Coins: {{ user_coins }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    {% for room in rooms %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ room[1] }}</h5>
+                <p class="card-text">
+                    <strong>Game:</strong> {{ room[5] }}<br>
+                    <strong>Entry Fee:</strong> {{ room[2] }} coins per player<br>
+                    <strong>Prize Pool:</strong> 💰 {{ room[3] }} Rs<br>
+                    <strong>Event Time:</strong> 
+                    {% if room[8] %}
+                        {% if room[8].__class__.__name__ == 'datetime' %}
+                            {{ room[8].strftime('%m/%d %H:%M') }}
+                        {% else %}
+                            {{ room[8] }}
+                        {% endif %}
+                    {% else %}
+                        TBD
+                    {% endif %}<br>
+                    <strong>Mode:</strong> {{ 'Multiplayer' if room[9] else 'Single Player' }}<br>
+                    <strong>Team Size:</strong> {{ room[10] }}-{{ room[11] }} players<br>
+                    <strong>Enrolled:</strong> {{ room[12] }}/{{ room[4] }} players<br>
+                    <span class="badge bg-success">{{ room[7] }}</span>
+                </p>
+                <a href="{{ url_for('room_details', room_id=room[0]) }}" class="btn btn-primary w-100">Join Tournament</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    {% if not rooms %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h4>No tournaments available</h4>
+            <p>Check back later for new gaming tournaments!</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

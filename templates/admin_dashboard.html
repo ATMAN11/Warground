@@ -1,0 +1,692 @@
+<!-- admin_dashboard.html -->
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="text-white mb-4">🛡️ Admin Dashboard</h2>
+    </div>
+</div>
+
+<!-- Financial Statistics Dashboard -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-gradient" style="background: linear-gradient(45deg, #28a745, #20c997);">
+            <div class="card-body text-white">
+                <h4 class="card-title mb-4">💰 Financial Overview</h4>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card bg-light bg-opacity-20 h-100">
+                            <div class="card-body text-center">
+                                <h5 class="text-white-50">Revenue Collected</h5>
+                                <h3 class="text-white">₹{{ financial_stats.total_collected }}</h3>
+                                <small class="text-white-75">From room enrollments</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light bg-opacity-20 h-100">
+                            <div class="card-body text-center">
+                                <h5 class="text-white-50">Player Coins</h5>
+                                <h3 class="text-white">{{ financial_stats.total_player_coins }}</h3>
+                                <small class="text-white-75">Total coins in system</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light bg-opacity-20 h-100">
+                            <div class="card-body text-center">
+                                <h5 class="text-white-50">Withdrawal Requests</h5>
+                                <h3 class="text-white">{{ financial_stats.withdrawal_stats.total_requests }}</h3>
+                                <small class="text-white-75">₹{{ financial_stats.withdrawal_stats.total_amount_requested }} requested</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-light bg-opacity-20 h-100">
+                            <div class="card-body text-center">
+                                <h5 class="text-white-50">Net Balance</h5>
+                                {% set net_balance = financial_stats.total_collected - financial_stats.withdrawal_stats.approved_amount %}
+                                <h3 class="text-white">₹{{ net_balance }}</h3>
+                                <small class="text-white-75">Revenue - Payouts</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Financial Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">📊 Enrollment Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ financial_stats.enrollment_stats.total_rooms }}</h4>
+                        <small class="text-muted">Total Rooms</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ financial_stats.enrollment_stats.paid_enrollments }}</h4>
+                        <small class="text-muted">Paid Enrollments</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span>Total Enrollments:</span>
+                    <strong>{{ financial_stats.enrollment_stats.total_enrollments }}</strong>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Pending Payments:</span>
+                    <strong class="text-warning">{{ financial_stats.enrollment_stats.pending_enrollments }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">💸 Withdrawal Statistics</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Pending:</span>
+                        <span class="badge bg-warning">{{ financial_stats.withdrawal_stats.pending_count }}</span>
+                    </div>
+                    <small class="text-muted">₹{{ financial_stats.withdrawal_stats.pending_amount }}</small>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Approved:</span>
+                        <span class="badge bg-success">{{ financial_stats.withdrawal_stats.approved_count }}</span>
+                    </div>
+                    <small class="text-muted">₹{{ financial_stats.withdrawal_stats.approved_amount }}</small>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Rejected:</span>
+                        <span class="badge bg-danger">{{ financial_stats.withdrawal_stats.rejected_count }}</span>
+                    </div>
+                    <small class="text-muted">₹{{ financial_stats.withdrawal_stats.rejected_amount }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">💳 Transaction Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Credits:</span>
+                        <span class="badge bg-success">{{ financial_stats.transaction_stats.total_credits }}</span>
+                    </div>
+                    <small class="text-muted">₹{{ financial_stats.transaction_stats.total_credit_amount }}</small>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span>Debits:</span>
+                        <span class="badge bg-danger">{{ financial_stats.transaction_stats.total_debits }}</span>
+                    </div>
+                    <small class="text-muted">₹{{ financial_stats.transaction_stats.total_debit_amount }}</small>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <strong>Net Flow:</strong>
+                    {% set net_flow = financial_stats.transaction_stats.total_credit_amount - financial_stats.transaction_stats.total_debit_amount %}
+                    <strong class="{{ 'text-success' if net_flow >= 0 else 'text-danger' }}">
+                        ₹{{ net_flow }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Performing Rooms -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">🏆 Top Revenue Generating Rooms</h6>
+            </div>
+            <div class="card-body">
+                {% if financial_stats.top_rooms %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Room Name</th>
+                                <th>Game</th>
+                                <th>Total Enrollments</th>
+                                <th>Paid Enrollments</th>
+                                <th>Revenue Generated</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in financial_stats.top_rooms %}
+                            <tr>
+                                <td><strong>{{ room[0] }}</strong></td>
+                                <td><span class="badge bg-info">{{ room[1] }}</span></td>
+                                <td>{{ room[2] }}</td>
+                                <td>{{ room[3] }}</td>
+                                <td><strong class="text-success">₹{{ room[4] }}</strong></td>
+                                <td>
+                                    {% set success_rate = (room[3] / room[2] * 100) if room[2] > 0 else 0 %}
+                                    <span class="badge bg-{{ 'success' if success_rate >= 80 else 'warning' if success_rate >= 50 else 'danger' }}">
+                                        {{ "%.1f"|format(success_rate) }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <h5>No revenue data available yet</h5>
+                    <p>Revenue will appear here once rooms start receiving paid enrollments</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="card-title mb-0">💰 Pending Payment Approvals</h4>
+            </div>
+            <div class="card-body">
+                {% if pending_payments %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Screenshot</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in pending_payments %}
+                            <tr>
+                                <td>{{ p[1] }}</td>
+                                <td>{{ p[2] }} Rs</td>
+                                <td>
+                                    <a href="/static/uploads/{{ p[3] }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                        View Screenshot
+                                    </a>
+                                </td>
+                                <td>{{ p[4] }}</td>
+                                <td>
+                                    <div class="btn-group-vertical" role="group">
+                                        <button class="btn btn-sm btn-success mb-1" onclick="approvePayment({{ p[0] }})">
+                                            ✅ Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="rejectPayment({{ p[0] }})">
+                                            ❌ Reject
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <h5>No pending payments</h5>
+                    <p>New payment requests will appear here for approval</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Pending Withdrawals</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>GPay</th>
+                                <th>Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in pending_withdrawals %}
+                            <tr>
+                                <td>{{ w[1] }}</td>
+                                <td>{{ w[2] }} Rs</td>
+                                <td>{{ w[3] }}</td>
+                                <td>{{ w[5] }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <button class="btn btn-sm btn-success" onclick="approveWithdrawal({{ w[0] }})">Approve</button>
+                                        <button class="btn btn-sm btn-danger" onclick="rejectWithdrawal({{ w[0] }})">Reject</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    <!-- COMMENTED OUT: Create New Room form moved to /admin/rooms -->
+    <!--
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Create New Room</h4>
+                <p class="text-muted">
+                    <i class="bi bi-arrow-right"></i> Room creation has been moved to 
+                    <a href="{{ url_for('admin_rooms') }}" class="btn btn-primary btn-sm">
+                        🏠 Manage Rooms
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    -->
+</div>
+
+<!-- Add Quick Navigation to Room Management -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <h4 class="card-title mb-3">🎮 Room Management</h4>
+                <p class="text-muted mb-3">Create new rooms and manage existing tournaments</p>
+                <a href="{{ url_for('admin_rooms') }}" class="btn btn-primary btn-lg">
+                    🏠 Go to Room Management
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <h4 class="card-title mb-3">📊 Quick Stats</h4>
+                <div class="row">
+                    <div class="col-6">
+                        <h5 class="text-primary">{{ financial_stats.enrollment_stats.total_rooms }}</h5>
+                        <small class="text-muted">Total Rooms</small>
+                    </div>
+                    <div class="col-6">
+                        <h5 class="text-success">{{ financial_stats.enrollment_stats.paid_enrollments }}</h5>
+                        <small class="text-muted">Paid Enrollments</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Winner Management Section -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <h4 class="card-title mb-3">🏆 Winner Management</h4>
+                <p class="text-muted mb-3">Select winners and distribute performance-based rewards</p>
+                <a href="{{ url_for('manage_winners') }}" class="btn btn-warning btn-lg">
+                    <i class="fas fa-trophy me-2"></i>Manage Winners
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <h4 class="card-title mb-3">🎯 Kill Management</h4>
+                <p class="text-muted mb-3">Record player kills and performance stats</p>
+                <a href="{{ url_for('admin_rooms') }}" class="btn btn-success btn-lg">
+                    <i class="fas fa-crosshairs me-2"></i>Manage Kills
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">Recent Processed Withdrawals</h4>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>GPay</th>
+                                <th>Status</th>
+                                <th>Requested</th>
+                                <th>Processed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in processed_withdrawals %}
+                            <tr>
+                                <td>{{ w[1] }}</td>
+                                <td>{{ w[2] }} Rs</td>
+                                <td>{{ w[3] }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if w[4] == 'approved' else 'danger' }}">
+                                        {{ w[4].title() }}
+                                    </span>
+                                </td>
+                                <td>{{ w[5] }}</td>
+                                <td>{{ w[6] if w[6] else 'N/A' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No processed withdrawals yet</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COMMENTED OUT: All Rooms table moved to /admin/rooms -->
+<!--
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title mb-4">All Rooms</h4>
+                <p class="text-muted">
+                    <i class="bi bi-arrow-right"></i> Room management has been moved to 
+                    <a href="{{ url_for('admin_rooms') }}" class="btn btn-primary">
+                        🏠 Manage Rooms
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+-->
+
+<!-- Original All Rooms table commented out since it's moved to /admin/rooms
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Game</th>
+                                <th>Entry Fee</th>
+                                <th>Prize</th>
+                                <th>Event Time</th>
+                                <th>Mode</th>
+                                <th>Team Size</th>
+                                <th>Max Players</th>
+                                <th>Room ID</th>
+                                <th>Status</th>
+                                <th>Active</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room in rooms %}
+                            <tr>
+                                <td>{{ room[1] }}</td>
+                                <td>{{ room[2] }}</td>
+                                <td>{{ room[3] }}</td>
+                                <td>{{ room[4] }}</td>
+                                <td>
+                                    {% if room[8] and room[8].__class__.__name__ == 'datetime' %}
+                                        {{ room[8].strftime('%m/%d %H:%M') }}
+                                    {% elif room[8] and room[8] != 'None' %}
+                                        {{ room[8] }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>{{ 'Multi' if room[9] else 'Single' }}</td>
+                                <td>{{ room[10] }}-{{ room[11] }}</td>
+                                <td>{{ room[5] }}</td>
+                                <td>{{ room[6] }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if room[12] == 'open' else 'secondary' }}">
+                                        {{ room[12] }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% set is_active = room[14] if room|length > 14 else 1 %}
+                                    <span class="badge bg-{{ 'success' if is_active else 'danger' }}">
+                                        {{ 'Active' if is_active else 'Disabled' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group-vertical" role="group">
+                                        <form method="POST" action="{{ url_for('toggle_room', room_id=room[0]) }}" style="display: inline;">
+                                            {% set is_active = room[14] if room|length > 14 else 1 %}
+                                            <button type="submit" class="btn btn-sm btn-{{ 'warning' if is_active else 'success' }} mb-1">
+                                                {{ 'Disable' if is_active else 'Enable' }} Room
+                                            </button>
+                                        </form>
+                                        
+                                        <a href="{{ url_for('room_enrollments', room_id=room[0]) }}" class="btn btn-sm btn-outline-info mb-1">
+                                            View Teams
+                                        </a>
+                                        
+                                        {% if room|length > 13 and room[13] %}
+                                        <a href="{{ url_for('manage_kills', room_id=room[0]) }}" class="btn btn-sm btn-warning mb-1">
+                                            🎯 Manage Kills
+                                        </a>
+                                        {% endif %}
+                                        
+                                        <button class="btn btn-sm btn-danger mb-1" data-bs-toggle="modal" data-bs-target="#blockUserModal" 
+                                                onclick="setBlockUserRoom({{ room[0] }}, '{{ room[1] }}')">
+                                            🚫 Block User
+                                        </button>
+                                        <button class="btn btn-sm btn-danger mb-1" data-bs-toggle="modal" data-bs-target="#blockTeamModal" 
+                                                onclick="setBlockTeamRoom({{ room[0] }}, '{{ room[1] }}')">
+                                            🚫 Block Team
+                                        </button>
+                                        
+                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#viewBlockedModal" 
+                                                onclick="viewBlockedUsers({{ room[0] }}, '{{ room[1] }}')">
+                                            📋 View Blocked
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+End of commented out All Rooms table -->
+
+<!-- Approve Withdrawal Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="approveForm" method="POST" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Approve Withdrawal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Upload Payment Screenshot</label>
+                        <input type="file" name="screenshot" class="form-control" accept="image/*" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Approve & Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Blocked Users/Teams Modal -->
+<div class="modal fade" id="viewBlockedModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📋 Blocked Users & Teams</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>Room: <span id="viewBlockedRoomName"></span></strong>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>🚫 Blocked Users</h6>
+                        <div id="blockedUsersList" class="list-group">
+                            <div class="text-center text-muted">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>🚫 Blocked Teams</h6>
+                        <div id="blockedTeamsList" class="list-group">
+                            <div class="text-center text-muted">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COMMENTED OUT: Room-related modals moved to /admin/rooms -->
+<!--
+Block User, Block Team, and View Blocked modals have been moved to admin_rooms.html
+since room management is now handled separately.
+-->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function approvePayment(transactionId) {
+    if (confirm('Are you sure you want to approve this payment? Coins will be added to the user\'s account.')) {
+        fetch('/admin/approve_payment/' + transactionId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload(); // Refresh page to show updated data
+            } else {
+                alert('Failed to approve payment');
+            }
+        })
+        .catch(error => {
+            console.error('Error approving payment:', error);
+            alert('Error approving payment');
+        });
+    }
+}
+
+function rejectPayment(transactionId) {
+    if (confirm('Are you sure you want to reject this payment? The payment request will be marked as rejected.')) {
+        fetch('/admin/reject_payment/' + transactionId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload(); // Refresh page to show updated data
+            } else {
+                alert('Failed to reject payment');
+            }
+        })
+        .catch(error => {
+            console.error('Error rejecting payment:', error);
+            alert('Error rejecting payment');
+        });
+    }
+}
+
+function approveWithdrawal(withdrawalId) {
+    const form = document.getElementById('approveForm');
+    form.action = '/admin/approve_withdrawal/' + withdrawalId;
+    const modal = new bootstrap.Modal(document.getElementById('approveModal'));
+    modal.show();
+}
+
+function rejectWithdrawal(withdrawalId) {
+    if (confirm('Are you sure you want to reject this withdrawal? The money will be returned to the user\'s account.')) {
+        fetch('/admin/reject_withdrawal/' + withdrawalId, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload(); // Refresh page to show updated data
+            } else {
+                alert('Failed to reject withdrawal');
+            }
+        })
+        .catch(error => {
+            console.error('Error rejecting withdrawal:', error);
+            alert('Error rejecting withdrawal');
+        });
+    }
+}
+
+// COMMENTED OUT: Room-related JavaScript functions moved to /admin/rooms
+/*
+All room management JavaScript functions have been moved to admin_rooms.html:
+- setBlockUserRoom()
+- loadUsernameSuggestions()
+- toggleUnblockMode()
+- setBlockTeamRoom()
+- toggleTeamUnblockMode()
+- loadTeamsForRoom()
+- viewBlockedUsers()
+- quickUnblockUser()
+- quickUnblockTeam()
+- kill rewards toggle functionality
+*/
+
+</script>
+{% endblock %}
