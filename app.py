@@ -1019,6 +1019,32 @@ def create_room():
     min_kills_required = int(request.form.get('min_kills_required', 0)) if enable_kill_rewards else 0
     reward_per_kill = float(request.form.get('reward_per_kill', 0.00)) if enable_kill_rewards else 0.00
     
+    # Winner reward configuration
+    enable_custom_rewards = 'enable_custom_rewards' in request.form
+    winner_rewards = {}
+    if enable_custom_rewards:
+        try:
+            winner_rewards = {
+                1: {  # 1st place
+                    'base_reward': float(request.form.get('first_place_base_reward', 0.00)),
+                    'kill_bonus': float(request.form.get('first_place_kill_bonus', 0.00)),
+                    'max_kill_bonus': float(request.form.get('first_place_max_kill_bonus', 0.00))
+                },
+                2: {  # 2nd place
+                    'base_reward': float(request.form.get('second_place_base_reward', 0.00)),
+                    'kill_bonus': float(request.form.get('second_place_kill_bonus', 0.00)),
+                    'max_kill_bonus': float(request.form.get('second_place_max_kill_bonus', 0.00))
+                },
+                3: {  # 3rd place
+                    'base_reward': float(request.form.get('third_place_base_reward', 0.00)),
+                    'kill_bonus': float(request.form.get('third_place_kill_bonus', 0.00)),
+                    'max_kill_bonus': float(request.form.get('third_place_max_kill_bonus', 0.00))
+                }
+            }
+        except (ValueError, TypeError):
+            flash('Invalid winner reward values. Please check your input.', 'danger')
+            return redirect(url_for('admin_dashboard'))
+    
     # Room status and blocking
     is_active = bool(int(request.form.get('is_active', 1)))
     blocked_users_text = request.form.get('blocked_users', '').strip()
@@ -1087,6 +1113,31 @@ def create_room():
         
         # Get the created room ID
         room_id = cur.lastrowid
+        
+        # Create winner reward settings
+        if enable_custom_rewards and winner_rewards:
+            # Insert custom reward settings from form
+            for position, rewards in winner_rewards.items():
+                cur.execute("""
+                    INSERT INTO room_reward_settings 
+                    (room_id, position, base_reward, kill_bonus_per_kill, max_kill_bonus)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (room_id, position, rewards['base_reward'], rewards['kill_bonus'], rewards['max_kill_bonus']))
+        else:
+            # Create default reward settings based on prize pool
+            total_prize_pool = float(prize_pool) * 0.8  # 80% of prize pool for winners
+            default_rewards = [
+                (1, total_prize_pool * 0.50, 10.0, total_prize_pool * 0.10),   # 1st: 50% + 10/kill
+                (2, total_prize_pool * 0.30, 7.5, total_prize_pool * 0.06),    # 2nd: 30% + 7.5/kill  
+                (3, total_prize_pool * 0.20, 5.0, total_prize_pool * 0.04),    # 3rd: 20% + 5/kill
+            ]
+            
+            for position, base_reward, kill_bonus, max_kill_bonus in default_rewards:
+                cur.execute("""
+                    INSERT INTO room_reward_settings 
+                    (room_id, position, base_reward, kill_bonus_per_kill, max_kill_bonus)
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (room_id, position, base_reward, kill_bonus, max_kill_bonus))
         
         # Handle blocked users if any were specified
         if blocked_usernames:
@@ -2220,24 +2271,18 @@ def room_winner_selection(room_id):
         """, (room_id,))
         reward_settings = cur.fetchall()
         
-        # If no reward settings, create defaults
+        # If no reward settings exist, this means it's an old room - create basic defaults
         if not reward_settings:
-            # Calculate prize pool
+            flash('This room was created without reward settings. Please contact admin to configure rewards.', 'warning')
+            # Create minimal default settings as fallback
             total_players = len(players)
-            
-            # Handle edge case: no players enrolled
-            if total_players == 0:
-                total_prize_pool = 0
-            else:
-                # Ensure entry_fee is a number (convert if needed)
-                # room[3] is entry_fee based on table structure: id, room_name, game_type, entry_fee, ...
-                entry_fee = float(room[3]) if room[3] is not None else 0
-                total_prize_pool = total_players * entry_fee * 0.8  # 80% of entry fees
+            entry_fee = float(room[3]) if room[3] is not None else 0
+            total_prize_pool = total_players * entry_fee * 0.8 if total_players > 0 else 1000
             
             default_rewards = [
-                (1, total_prize_pool * 0.6, 5.0, 50.0),   # 1st: 60%
-                (2, total_prize_pool * 0.3, 3.0, 30.0),   # 2nd: 30%
-                (3, total_prize_pool * 0.1, 2.0, 20.0),   # 3rd: 10%
+                (1, total_prize_pool * 0.50, 5.0, 100.0),   # 1st: 50%
+                (2, total_prize_pool * 0.30, 3.0, 75.0),    # 2nd: 30%
+                (3, total_prize_pool * 0.20, 2.0, 50.0),    # 3rd: 20%
             ]
             
             for position, base_reward, kill_bonus, max_kill_bonus in default_rewards:

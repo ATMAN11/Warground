@@ -138,6 +138,87 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Winner Reward Configuration -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">🏆 Winner Reward Configuration</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="enable_custom_rewards" name="enable_custom_rewards" value="1">
+                                <label class="form-check-label" for="enable_custom_rewards">
+                                    Configure Custom Winner Rewards (otherwise auto-calculated from prize pool)
+                                </label>
+                            </div>
+                            
+                            <div id="custom_reward_settings" style="display: none;">
+                                <!-- 1st Place Rewards -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="text-primary">🥇 1st Place Rewards</h6>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Base Reward (Rs)</label>
+                                        <input type="number" step="0.01" name="first_place_base_reward" class="form-control" placeholder="500.00" min="0" value="500.00">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Kill Bonus per Kill (Rs)</label>
+                                        <input type="number" step="0.01" name="first_place_kill_bonus" class="form-control" placeholder="10.00" min="0" value="10.00">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Max Kill Bonus (Rs)</label>
+                                        <input type="number" step="0.01" name="first_place_max_kill_bonus" class="form-control" placeholder="100.00" min="0" value="100.00">
+                                    </div>
+                                </div>
+
+                                <!-- 2nd Place Rewards -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="text-success">🥈 2nd Place Rewards</h6>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Base Reward (Rs)</label>
+                                        <input type="number" step="0.01" name="second_place_base_reward" class="form-control" placeholder="300.00" min="0" value="300.00">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Kill Bonus per Kill (Rs)</label>
+                                        <input type="number" step="0.01" name="second_place_kill_bonus" class="form-control" placeholder="7.50" min="0" value="7.50">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Max Kill Bonus (Rs)</label>
+                                        <input type="number" step="0.01" name="second_place_max_kill_bonus" class="form-control" placeholder="75.00" min="0" value="75.00">
+                                    </div>
+                                </div>
+
+                                <!-- 3rd Place Rewards -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="text-warning">🥉 3rd Place Rewards</h6>
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Base Reward (Rs)</label>
+                                        <input type="number" step="0.01" name="third_place_base_reward" class="form-control" placeholder="200.00" min="0" value="200.00">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Kill Bonus per Kill (Rs)</label>
+                                        <input type="number" step="0.01" name="third_place_kill_bonus" class="form-control" placeholder="5.00" min="0" value="5.00">
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="form-label">Max Kill Bonus (Rs)</label>
+                                        <input type="number" step="0.01" name="third_place_max_kill_bonus" class="form-control" placeholder="50.00" min="0" value="50.00">
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <small>
+                                        <strong>💡 How it works:</strong> Winners get Base Reward + (kills × Kill Bonus), capped at Max Kill Bonus.
+                                        <br><strong>Example:</strong> 1st place with 15 kills = ₹500 + (15 × ₹10) = ₹650 (if under max limit)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Room Status Settings -->
                     <div class="card mb-3">
@@ -668,6 +749,53 @@ document.getElementById('enable_kill_rewards').addEventListener('change', functi
             input.required = false;
             input.value = input.placeholder.includes('Minimum') ? '5' : '10.00';
         });
+    }
+});
+
+// Toggle custom winner reward settings
+document.getElementById('enable_custom_rewards').addEventListener('change', function() {
+    const settings = document.getElementById('custom_reward_settings');
+    
+    if (this.checked) {
+        settings.style.display = 'block';
+        // Auto-fill with percentage-based values from prize pool
+        autoFillRewardValues();
+    } else {
+        settings.style.display = 'none';
+    }
+});
+
+// Auto-fill reward values based on prize pool
+function autoFillRewardValues() {
+    const prizePoolInput = document.querySelector('input[name="prize_pool"]');
+    if (!prizePoolInput || !prizePoolInput.value) return;
+    
+    const prizePool = parseFloat(prizePoolInput.value);
+    
+    // Auto-fill based on common tournament distributions (50%, 30%, 20%)
+    document.querySelector('input[name="first_place_base_reward"]').value = (prizePool * 0.50).toFixed(2);
+    document.querySelector('input[name="second_place_base_reward"]').value = (prizePool * 0.30).toFixed(2);
+    document.querySelector('input[name="third_place_base_reward"]').value = (prizePool * 0.20).toFixed(2);
+    
+    // Set reasonable kill bonuses based on prize pool
+    const firstKillBonus = Math.max(5, prizePool * 0.01).toFixed(2);
+    const secondKillBonus = Math.max(3, prizePool * 0.0075).toFixed(2);
+    const thirdKillBonus = Math.max(2, prizePool * 0.005).toFixed(2);
+    
+    document.querySelector('input[name="first_place_kill_bonus"]').value = firstKillBonus;
+    document.querySelector('input[name="second_place_kill_bonus"]').value = secondKillBonus;
+    document.querySelector('input[name="third_place_kill_bonus"]').value = thirdKillBonus;
+    
+    // Set max kill bonuses (20% of base reward)
+    document.querySelector('input[name="first_place_max_kill_bonus"]').value = (prizePool * 0.50 * 0.20).toFixed(2);
+    document.querySelector('input[name="second_place_max_kill_bonus"]').value = (prizePool * 0.30 * 0.20).toFixed(2);
+    document.querySelector('input[name="third_place_max_kill_bonus"]').value = (prizePool * 0.20 * 0.20).toFixed(2);
+}
+
+// Auto-fill when prize pool changes
+document.querySelector('input[name="prize_pool"]').addEventListener('input', function() {
+    if (document.getElementById('enable_custom_rewards').checked) {
+        autoFillRewardValues();
     }
 });
 </script>
